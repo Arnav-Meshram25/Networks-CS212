@@ -13,14 +13,35 @@ def show_menu():
     print("3. IP Geolocation (Your Own IP)")
     print("4. IP Geolocation (Any IP)")
     print("5. Ping a Website/IP")
-    print("6. Traceroute to Host/IP")
+    print("6. Traceroute to Host/IP (with Configurations)")
     print("7. HTTP Server Header Grabber")
     print("8. Get External IP Address")
     print("9. DNS Lookup")
+    print("10. Show User Manual")
     print("0. Exit")
     print("--------------------------------------------")
 
-# 1. Show Wi-Fi networks
+def show_manual():
+    print("\nUSER MANUAL")
+    print("--------------------------------------------")
+    print("This tool offers essential network functions:")
+    print("1 - List nearby Wi-Fi networks (Windows only)")
+    print("2 - Test your internet download/upload speeds")
+    print("3 - Show your IP geolocation (city, country, org)")
+    print("4 - Get geolocation for any IP address")
+    print("5 - Ping a domain or IP to check reachability")
+    print("6 - Traceroute with optional settings:")
+    print("    - Skip DNS resolution (-d)")
+    print("    - Set max hops (-h)")
+    print("    - Set timeout (-w, in ms)")
+    print("7 - Fetch HTTP response headers from a website")
+    print("8 - Get your external (public) IP address")
+    print("9 - Perform DNS lookup on a domain")
+    print("\nNote: Requires Windows system. Libraries needed:")
+    print(" - requests")
+    print(" - speedtest-cli")
+    print("--------------------------------------------")
+
 def wifi_networks():
     print("\nAvailable Wi-Fi Networks:")
     try:
@@ -29,7 +50,6 @@ def wifi_networks():
     except subprocess.CalledProcessError as e:
         print(f"Error: {e.output}")
 
-# 2. Internet speed test
 def internet_speed_test():
     print("\nTesting Internet Speed...")
     try:
@@ -44,7 +64,6 @@ def internet_speed_test():
     except Exception as e:
         print(f"Error during speed test: {e}")
 
-# 3. IP Geolocation (own IP)
 def own_ip_geolocation():
     print("\nFetching Your IP Geolocation...")
     try:
@@ -59,7 +78,6 @@ def own_ip_geolocation():
     except Exception as e:
         print(f"Error fetching geolocation: {e}")
 
-# 4. IP Geolocation (any IP)
 def any_ip_geolocation():
     ip = input("Enter IP address to locate: ")
     print(f"\nFetching Geolocation for {ip}...")
@@ -75,7 +93,6 @@ def any_ip_geolocation():
     except Exception as e:
         print(f"Error fetching geolocation: {e}")
 
-# 5. Ping Website/IP
 def ping_website():
     target = input("Enter domain or IP to ping: ")
     print(f"\nPinging {target}...")
@@ -85,17 +102,34 @@ def ping_website():
     except subprocess.CalledProcessError as e:
         print(f"Ping failed: {e.output}")
 
-# 6. Traceroute
 def traceroute():
     target = input("Enter domain or IP to traceroute: ")
-    print(f"\nTracerouting to {target}...")
+    print("\nAvailable traceroute configurations:")
+    print(" - Skip DNS resolution (-d)")
+    print(" - Set maximum hops (-h, default 30)")
+    print(" - Set timeout per hop (-w, default 4000 ms)")
+
+    skip_dns_input = input("Skip DNS resolution? (y/n): ").lower()
+    skip_dns = skip_dns_input == 'y'
+
+    max_hops_input = input("Set max hops (press Enter to use default 30): ")
+    max_hops = int(max_hops_input) if max_hops_input else 30
+
+    timeout_input = input("Set timeout in ms (press Enter to use default 4000): ")
+    timeout = int(timeout_input) if timeout_input else 4000
+
+    command = ['tracert']
+    if skip_dns:
+        command.append('-d')
+    command += ['-h', str(max_hops), '-w', str(timeout), target]
+
+    print(f"\nRunning command: {' '.join(command)}")
     try:
-        output = subprocess.check_output(['tracert', target], text=True)
+        output = subprocess.check_output(command, text=True)
         print(output)
     except subprocess.CalledProcessError as e:
         print(f"Error: {e.output}")
 
-# 7. HTTP Header Grabber
 def header_grabber():
     url = input("Enter a website URL (without http/https): ")
     if not url.startswith("http"):
@@ -109,7 +143,6 @@ def header_grabber():
     except Exception as e:
         print(f"Error fetching headers: {e}")
 
-# 8. Get External IP
 def get_external_ip():
     print("\nGetting External IP Address...")
     try:
@@ -118,7 +151,6 @@ def get_external_ip():
     except Exception as e:
         print(f"Error fetching external IP: {e}")
 
-# 9. DNS Lookup
 def dns_lookup():
     domain = input("Enter domain for DNS lookup: ")
     try:
@@ -127,7 +159,6 @@ def dns_lookup():
     except socket.gaierror:
         print("DNS Lookup failed.")
 
-# Main
 if __name__ == "__main__":
     while True:
         show_menu()
@@ -151,6 +182,8 @@ if __name__ == "__main__":
             get_external_ip()
         elif choice == '9':
             dns_lookup()
+        elif choice == '10':
+            show_manual()
         elif choice == '0':
             print("Exiting. Thank you!")
             break
